@@ -9,7 +9,6 @@
 <body>
     <div class="main-wrapper">
         
-        <!-- ===== 0. የመግቢያ ስክሪን (Landing Screen) - መጀመሪያ ይታያል ===== -->
         <div id="landing-screen">
             <div class="welcome-box">
                 <h1>እንኳን ደህና መጡ</h1>
@@ -17,23 +16,19 @@
                 
                 <div class="stake-selection">
                     <p>የውርርድ መጠን ይምረጡ</p>
-                    <!-- Stake buttons will be handled by JS to change the active-stake class -->
                     <button class="stake-btn active-stake" data-stake="10">Stake 10</button>
                     <button class="stake-btn" data-stake="20">Stake 20</button>
                     <button class="stake-btn" data-stake="50">Stake 50</button>
                 </div>
 
-                <!-- This button will be enabled when a stake is selected and click will move to Selection Screen -->
                 <button id="start-selection-btn" class="play-btn">
                     ▷ Play 10 ETB
                 </button>
             </div>
         </div>
 
-        <!-- ===== 1. የካርድ መምረጫ ስክሪን (Selection Screen) - መጀመሪያ ይደበቃል ===== -->
         <div id="selection-screen" style="display: none;">
             
-            <!-- 1. ራስጌ (Wallet, Stake, Time) -->
             <div class="selection-header">
                 <div class="header-info">
                     <span class="label">Main Wallet</span>
@@ -48,13 +43,17 @@
                 </div>
             </div>
 
-            <!-- 2. 10x10 የካርድ መምረጫ ግሪድ -->
             <div id="card-selection-grid" class="card-selection-grid">
-                <!-- 100 ካርድ ቁጥሮች በ JS ይሞላሉ -->
-            </div>
+                </div>
+            
+            <div id="confirmation-status" class="confirmation-status">ካርድ ይምረጡና አረጋግጡ</div>
+            
+            <button id="confirm-card-btn" class="selection-action-btn" disabled>
+                ካርዱን አረጋግጥ
+            </button>
+            
             <p style="text-align: center; font-size: 0.8em; color: #ccc; margin-top: 10px;">ካርድዎን ለመምረጥ ጊዜው እየሮጠ ነው!</p>
 
-            <!-- 3. ታችኛው አዝራሮች (Footer Navigation) -->
             <div class="selection-footer">
                 <div class="footer-btn active" data-target="game">Game</div>
                 <div class="footer-btn" data-target="wallet">Wallet</div>
@@ -63,57 +62,46 @@
             
         </div>
 
-        <!-- ===== 2. ዋናው የጨዋታ ስክሪን (Game Screen) - የእርስዎ ኦሪጅናል ኮድ እዚህ ተጠቅልሏል ===== -->
         <div id="game-screen" style="display: none;">
             
             <div class="game-area-grid">
                 
-                <!-- ግራ አካል: Master Grid እና ተዛማጅ አዝራሮች -->
                 <div class="left-main-area">
                     
-                    <!-- 1. ላይኛው አዝራር -->
                     <div class="top-round-btn">
                         አዲስ ካርድ
                     </div>
                     
-                    <!-- 2. መካከለኛ ትልቅ ብሎክ (MASTER GRID AREA) -->
                     <div class="large-block master-grid-container">
-                        <!-- Master Grid እዚህ ይገባል -->
                         <div id="master-grid" class="master-grid">
-                            <!-- ቁጥሮች በ JS ይሞላሉ -->
-                        </div>
+                            </div>
                     </div>
 
-                    <!-- 3. መካከለኛ አዝራር (Refresh) -->
                     <div class="mid-round-btn" id="refresh-btn">
                         Refresh
                     </div>
                 </div>
 
-                <!-- ቀኝ አካል: Player Card እና ተዛማጅ አዝራሮች -->
                 <div class="right-main-area">
                     
-                    <!-- 1. Call (የተጠራ ቁጥር) -->
                     <div class="top-call-circle" id="current-call">
                         Call
                     </div>
                     
-                    <!-- Call History -->
                     <div class="call-history" id="call-history">
                         <span class="history-item">-</span>
                         <span class="history-item">-</span>
                         <span class="history-item">-</span>
                     </div>
 
-                    <!-- 2. መካከለኛ ትልቅ ብሎክ (PLAYER CARD AREA) -->
                     <div class="large-block player-card-container">
-                        <!-- Player Card እዚህ ይገባል -->
-                        <div id="player-bingo-card" class="bingo-card-player">
-                            <!-- ካርድ በ JS ይሞላል -->
+                        <div id="watch-only-placard" class="watch-only-placard">
+                            WATCH ONLY
                         </div>
+                        <div id="player-bingo-card" class="bingo-card-player">
+                            </div>
                     </div>
 
-                    <!-- 3. BINGO አዝራር -->
                     <div class="bottom-btn bingo-btn-placeholder" id="bingo-btn">
                         BINGO
                     </div>
