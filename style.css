@@ -1,0 +1,223 @@
+/* style.css (የተስተካከለ: Exit እና Refresh ተወግደዋል፣ Layout ተስተካክሏል) */
+
+:root {
+    --color-bg-dark: #12121e;
+    --color-block-dark: #2c293d;
+    --color-accent: #ffc107;
+    --color-text-light: #f4f4f9;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-light);
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden; 
+}
+
+.main-wrapper {
+    width: 100%;
+    padding: 5px; 
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; 
+}
+
+/* ===== ዋናው የጨዋታ አካል (2 Column Layout) ===== */
+.game-area-grid {
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-between; 
+    gap: 10px; 
+    flex-grow: 1; 
+    max-height: 98vh; 
+}
+
+/* ግራ እና ቀኝ ዋና ብሎኮች */
+.left-main-area, .right-main-area {
+    width: 48%; 
+    display: flex;
+    flex-direction: column;
+    gap: 8px; 
+    height: 100%; /* ሙሉውን ቁመት ይይዛሉ */
+}
+
+/* ===== የግራ አካል ንጥረ ነገሮች ===== */
+
+.top-round-btn {
+    padding: 5px 10px;
+    background-color: var(--color-block-dark);
+    border: 3px solid #d9534f; 
+    border-radius: 15px; 
+    text-align: center;
+    font-size: 0.9em;
+    height: 6%; 
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 2. መካከለኛ ትልቅ ብሎክ (Master Grid ቦታ) */
+.large-block {
+    background-color: var(--color-block-dark);
+    border: 3px solid #d9534f;
+    border-radius: 20px;
+    flex-grow: 1; 
+    padding: 5px; 
+    min-height: 0; 
+    display: flex; 
+}
+
+.master-grid-container {
+    flex-grow: 1; /* የቀረውን ቦታ ሙሉ በሙሉ ይይዛል (Exit ስለወጣ) */
+}
+
+
+/* 3. መካከኛ አዝራር (Refresh) */
+.mid-round-btn {
+    padding: 10px;
+    background-color: var(--color-block-dark);
+    border: 3px solid #d9534f;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 0.9em;
+    height: 7%; 
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 4. የታችኛው አዝራር (Exit) ወጥቷል */
+
+
+/* ===== የቀኝ አካል ንጥረ ነገሮች ===== */
+
+/* 1. Call (ክብ ቅርጽ) */
+.top-call-circle {
+    width: 60px; 
+    height: 60px; 
+    background-color: var(--color-block-dark);
+    border: 3px solid #d9534f;
+    border-radius: 50%; 
+    text-align: center;
+    line-height: 54px; 
+    font-size: 0.9em;
+    margin: 0 auto; 
+    margin-bottom: 8px;
+    flex-shrink: 0; 
+}
+
+/* 2. Player Card ቦታ */
+.player-card-container {
+    flex-grow: 1; /* Refresh ስለወጣ የቀረውን ቦታ (ከ Call እና BINGO ውጪ) ይይዛል */
+}
+
+/* 3. BINGO አዝራር */
+.bottom-btn {
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 15px;
+    border: 3px solid #d9534f;
+    font-size: 0.9em;
+    height: 7%; 
+    background-color: #3e3e3e; 
+    flex-shrink: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bingo-btn-placeholder {
+    background-color: var(--color-accent); 
+    color: var(--color-bg-dark);
+}
+/* Refresh አዝራር ወጥቷል */
+
+/* ===== የ Master Grid (1-75) ቅንብሮች ===== */
+
+.master-grid {
+    display: grid; 
+    grid-template-columns: repeat(5, 1fr); 
+    grid-template-rows: repeat(15, 1fr); 
+    gap: 1px; 
+    padding: 2px; 
+    flex-grow: 1; 
+    overflow: hidden; 
+    background-color: #12121e;
+    border-radius: 5px;
+    height: 100%; 
+}
+
+.master-cell {
+    background-color: #1f1c2c;
+    color: #fff;
+    padding: 1px 0; 
+    border-radius: 1px;
+    text-align: center;
+    font-size: 0.6em; 
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.master-cell.called {
+    background-color: var(--color-accent);
+    color: var(--color-bg-dark);
+    font-weight: bold;
+}
+
+/* ===== የ Player Card (5x5) ቅንብሮች ===== */
+
+.bingo-card-player {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(6, 1fr); 
+    gap: 1px;
+    background-color: #12121e;
+    border-radius: 5px;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+}
+
+.header {
+    padding: 1px 0; 
+    font-size: 0.6em; 
+    background-color: #5c596e; 
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell {
+    padding: 1px 0; 
+    font-size: 0.6em; 
+    background-color: #1f1c2c;
+    color: #fff;
+    text-align: center;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cell.marked {
+    background-color: var(--color-accent);
+    color: var(--color-bg-dark);
+    font-weight: bold;
+}
+
+.cell.free-space {
+    background-color: var(--color-accent); 
+}

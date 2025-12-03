@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chewatabingo Layout</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <div class="main-wrapper">
+        
+        <div class="game-area-grid">
+            
+            <div class="left-main-area">
+                
+                <div class="top-round-btn">
+                    አዲስ ካርድ
+                </div>
+                
+                <div class="large-block master-grid-container">
+                    <div id="master-grid" class="master-grid">
+                        </div>
+                </div>
+
+                <div class="mid-round-btn" id="refresh-btn">
+                    Refresh
+                </div>
+                
+                </div>
+
+            <div class="right-main-area">
+                
+                <div class="top-call-circle">
+                    Call
+                </div>
+                
+                <div class="large-block player-card-container">
+                    <div id="player-bingo-card" class="bingo-card-player">
+                        </div>
+                </div>
+
+                <div class="bottom-btn bingo-btn-placeholder">
+                    BINGO
+                </div>
+
+                </div>
+            
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
