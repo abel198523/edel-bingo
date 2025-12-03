@@ -26,7 +26,6 @@ body {
 
 .main-wrapper {
     width: 100%;
-    /* padding: 5px; - በስክሪኖች ውስጥ ይደረጋል */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -39,14 +38,12 @@ body {
 /* ================================================== */
 
 #landing-screen {
-    display: flex; /* መጀመሪያ ይታያል */
+    display: flex; 
     flex-direction: column;
     align-items: center;
     justify-content: center;
     flex-grow: 1;
     padding: 20px;
-    height: 100vh;
-    height: 100dvh;
     box-sizing: border-box;
     background-color: #1a1a2e; 
     text-align: center;
@@ -91,11 +88,15 @@ body {
     border-radius: 10px;
     cursor: pointer;
     font-weight: bold;
+    transition: all 0.2s;
 }
 
 .stake-btn.active-stake {
     background-color: var(--color-accent);
     color: var(--color-block-dark);
+}
+.stake-btn:not(.active-stake):hover {
+    border-color: var(--color-accent);
 }
 
 .play-btn {
@@ -110,18 +111,19 @@ body {
     cursor: pointer;
     transition: background-color 0.2s;
 }
+.play-btn:hover {
+    background-color: #1e7e34;
+}
 
 /* ================================================== */
 /* ===== 1. የካርድ መምረጫ ስክሪን (Selection Screen CSS) ===== */
 /* ================================================== */
 
 #selection-screen {
-    display: none; /* መጀመሪያ ይደበቃል */
+    display: none; 
     flex-direction: column;
     flex-grow: 1;
     padding: 5px;
-    height: 100vh;
-    height: 100dvh;
     box-sizing: border-box;
     background-color: #1a1a2e; 
 }
@@ -173,6 +175,7 @@ body {
     background-color: var(--color-block-dark);
     border-radius: 8px;
     overflow-y: auto; 
+    max-height: 50vh; /* ለሞባይል እይታ */
 }
 
 .card-select-cell {
@@ -186,18 +189,58 @@ body {
     border-radius: 5px;
     cursor: pointer;
     aspect-ratio: 1 / 1; 
+    transition: background-color 0.15s;
+}
+.card-select-cell:not(.taken):hover {
+    background-color: #555;
 }
 
 /* ለሌሎች ተጫዋቾች የተያዙ ካርዶች */
 .card-select-cell.taken {
     background-color: var(--color-red-mark); 
     color: white;
+    cursor: not-allowed;
 }
 
 /* ተጫዋቹ የመረጠው ካርድ */
 .card-select-cell.selected {
     background-color: var(--color-accent); 
-    color: var(--color-bg-dark);
+    color: var(--color-block-dark);
+    /* cursor: default; - ለመምረጥ እንዲፈቅድ */
+}
+
+/* አዲስ: Confirm Button Style */
+.selection-action-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--color-block-dark);
+    background-color: var(--color-accent); 
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.2s;
+}
+.selection-action-btn:hover:not(:disabled) {
+    background-color: #ffd764;
+}
+
+.selection-action-btn:disabled {
+    background-color: #5c596e;
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+/* አዲስ: Confirmation Status */
+.confirmation-status {
+    text-align: center;
+    color: var(--color-accent);
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 0.9em;
+    min-height: 20px;
 }
 
 /* ታችኛው አዝራሮች (Footer Navigation) */
@@ -228,15 +271,15 @@ body {
 /* ================================================== */
 
 #game-screen {
-    display: none; /* መጀመሪያ ይደበቃል */
-    padding: 5px; /* ከዋናው main-wrapper padding ተወስዷል */
+    display: none; 
+    padding: 5px; 
     box-sizing: border-box;
     flex-grow: 1; 
     height: 100%;
 }
 
 
-/* ===== ዋናው የጨዋታ አካል (2 Column Layout) - ኦሪጅናል ኮድዎ ===== */
+/* ===== ዋናው የጨዋታ አካል (2 Column Layout) ===== */
 .game-area-grid {
     display: flex;
     flex-direction: row; 
@@ -271,7 +314,7 @@ body {
 .top-round-btn {
     padding: 5px 10px;
     background-color: var(--color-block-dark);
-    border: 3px solid #d9534f; 
+    border: 3px solid var(--color-red-mark); 
     border-radius: 15px; 
     text-align: center;
     font-size: 0.9em;
@@ -280,12 +323,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 /* 2. መካከለኛ ትልቅ ብሎክ (Master Grid ቦታ) */
 .large-block {
     background-color: var(--color-block-dark);
-    border: 3px solid #d9534f;
+    border: 3px solid var(--color-red-mark);
     border-radius: 20px;
     flex: 1 1 0;
     padding: 5px; 
@@ -304,7 +348,7 @@ body {
 .mid-round-btn {
     padding: 8px;
     background-color: var(--color-block-dark);
-    border: 3px solid #d9534f;
+    border: 3px solid var(--color-red-mark);
     border-radius: 15px;
     text-align: center;
     font-size: 0.9em;
@@ -313,6 +357,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 
@@ -323,7 +368,7 @@ body {
     width: 50px; 
     height: 50px; 
     background-color: var(--color-block-dark);
-    border: 3px solid #d9534f;
+    border: 3px solid var(--color-red-mark);
     border-radius: 50%; 
     text-align: center;
     line-height: 44px; 
@@ -331,7 +376,7 @@ body {
     margin: 0 auto; 
     margin-bottom: 4px;
     flex-shrink: 0;
-    cursor: pointer;
+    cursor: default; /* ይህ አውቶማቲክ ጥሪ ስለሆነ ጠቋሚውን ይደብቃል */
 }
 
 /* Call History */
@@ -351,7 +396,7 @@ body {
     width: 36px;
     height: 36px;
     background-color: #1f1c2c;
-    border: 2px solid #d9534f;
+    border: 2px solid var(--color-red-mark);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -365,6 +410,26 @@ body {
 .player-card-container {
     flex: 1 1 auto;
     min-height: 0;
+    position: relative; /* ለ Watch Only Placard ያስፈልጋል */
+}
+
+/* አዲስ: Watch Only Placard */
+.watch-only-placard {
+    background-color: rgba(44, 41, 61, 0.9); /* ጥቁር ግልጽነት ያለው ዳራ */
+    color: var(--color-accent);
+    display: none; /* በ JS ይገለጣል */
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    border: 3px solid var(--color-red-mark);
+    border-radius: 15px;
+    height: 100%;
+    width: 100%;
+    position: absolute; 
+    top: 0;
+    left: 0;
+    z-index: 10;
 }
 
 /* 3. BINGO አዝራር */
@@ -373,7 +438,7 @@ body {
     text-align: center;
     font-weight: bold;
     border-radius: 15px;
-    border: 3px solid #d9534f;
+    border: 3px solid var(--color-red-mark);
     font-size: 0.9em;
     min-height: 44px;
     background-color: #3e3e3e; 
@@ -381,15 +446,18 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 .bingo-btn-placeholder {
     background-color: var(--color-accent); 
     color: var(--color-bg-dark);
 }
+.bottom-btn:hover {
+    filter: brightness(1.1);
+}
 
 /* ===== የ Master Grid (1-75) ቅንብሮች ===== */
-
 .master-grid {
     display: grid; 
     grid-template-columns: repeat(5, 1fr); 
@@ -409,13 +477,12 @@ body {
     padding: 1px 0; 
     border-radius: 1px;
     text-align: center;
-    font-size: 0.6em; 
+    font-size: 0.7em; 
     font-weight: 500;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-
 .master-cell.called {
     background-color: var(--color-accent);
     color: var(--color-bg-dark);
@@ -423,7 +490,6 @@ body {
 }
 
 /* ===== የ Player Card (5x5) ቅንብሮች ===== */
-
 .bingo-card-player {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -438,8 +504,8 @@ body {
 
 .header {
     padding: 1px 0; 
-    font-size: 0.6em; 
-    background-color: #5c596e; 
+    font-size: 0.8em; 
+    background-color: var(--color-blue-dark); 
     font-weight: bold;
     text-align: center;
     display: flex;
@@ -449,7 +515,7 @@ body {
 
 .cell {
     padding: 1px 0; 
-    font-size: 0.6em; 
+    font-size: 0.8em; 
     background-color: #1f1c2c;
     color: #fff;
     text-align: center;
@@ -457,6 +523,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+}
+.cell:hover:not(.marked):not(.free-space) {
+    background-color: #3e3e3e;
 }
 
 .cell.marked {
@@ -467,4 +537,40 @@ body {
 
 .cell.free-space {
     background-color: var(--color-accent); 
+    color: var(--color-bg-dark);
+    cursor: default;
+}
+
+/* ================================================== */
+/* ===== Mobile Responsive Adjustments (<= 600px) ===== */
+/* ================================================== */
+
+@media (max-width: 600px) {
+    /* Stack game elements vertically */
+    .game-area-grid {
+        flex-direction: column; 
+        gap: 5px;
+        height: 100%;
+        max-height: none;
+        overflow-y: auto; 
+    }
+
+    .left-main-area, .right-main-area {
+        width: 100%; 
+        height: auto;
+        min-height: 250px; 
+    }
+
+    /* Master Grid on mobile to prevent squishing */
+    .master-cell {
+        font-size: 0.8em;
+    }
+    .bingo-card-player .header, .bingo-card-player .cell {
+        font-size: 1.0em;
+    }
+
+    .card-selection-grid {
+        gap: 5px;
+        max-height: none; /* Mobile can use more screen space */
+    }
 }
