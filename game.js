@@ -158,7 +158,7 @@ function callNumber() {
     const uncalledNumbers = masterNumbers.filter(num => !calledNumbers.includes(num));
     
     if (uncalledNumbers.length === 0) {
-        alert('All numbers have been called!');
+        stopAutoCall();
         return;
     }
     
@@ -172,6 +172,9 @@ function callNumber() {
     if (callBtn) {
         callBtn.textContent = calledNumber;
     }
+    
+    // Update call history (show last 3 calls)
+    updateCallHistory();
     
     // Mark the number in the master grid
     const masterCells = document.querySelectorAll('.master-cell');
@@ -191,6 +194,20 @@ function callNumber() {
     });
     
     checkForBingo();
+}
+
+// Update call history display
+function updateCallHistory() {
+    const historyItems = document.querySelectorAll('.history-item');
+    const lastThree = calledNumbers.slice(-4, -1).reverse();
+    
+    historyItems.forEach((item, index) => {
+        if (lastThree[index]) {
+            item.textContent = lastThree[index];
+        } else {
+            item.textContent = '-';
+        }
+    });
 }
 
 // Check if player has bingo
@@ -246,6 +263,12 @@ function resetGame() {
     if (callBtn) {
         callBtn.textContent = 'Call';
     }
+    
+    // Reset call history
+    const historyItems = document.querySelectorAll('.history-item');
+    historyItems.forEach(item => {
+        item.textContent = '-';
+    });
     
     // Restart auto-call
     startAutoCall();
