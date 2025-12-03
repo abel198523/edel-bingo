@@ -39,19 +39,24 @@ function stopAutoCall() {
     }
 }
 
-// Create the master grid (1-75)
+// Create the master grid (1-75) - arranged by BINGO columns
 function initializeMasterGrid() {
     const masterGrid = document.getElementById('master-grid');
     masterGrid.innerHTML = '';
     masterNumbers = [];
     
-    for (let i = 1; i <= 75; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'master-cell';
-        cell.textContent = i;
-        cell.dataset.number = i;
-        masterGrid.appendChild(cell);
-        masterNumbers.push(i);
+    // B: 1-15, I: 16-30, N: 31-45, G: 46-60, O: 61-75
+    // Grid is 5 columns x 15 rows, fill by row but with BINGO order
+    for (let row = 0; row < 15; row++) {
+        for (let col = 0; col < 5; col++) {
+            const number = (col * 15) + row + 1;
+            const cell = document.createElement('div');
+            cell.className = 'master-cell';
+            cell.textContent = number;
+            cell.dataset.number = number;
+            masterGrid.appendChild(cell);
+            masterNumbers.push(number);
+        }
     }
 }
 
