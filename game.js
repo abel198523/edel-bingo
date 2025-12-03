@@ -5,6 +5,7 @@ let masterNumbers = [];
 let calledNumbers = [];
 let playerCard = [];
 let markedCells = new Set();
+let autoCallInterval = null;
 
 // Initialize Telegram WebApp
 let tg = window.Telegram?.WebApp;
@@ -17,7 +18,26 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMasterGrid();
     generatePlayerCard();
     setupEventListeners();
+    startAutoCall();
 });
+
+// Auto-call system - calls a number every 3 seconds
+function startAutoCall() {
+    if (autoCallInterval) {
+        clearInterval(autoCallInterval);
+    }
+    autoCallInterval = setInterval(function() {
+        callNumber();
+    }, 3000);
+}
+
+// Stop auto-call
+function stopAutoCall() {
+    if (autoCallInterval) {
+        clearInterval(autoCallInterval);
+        autoCallInterval = null;
+    }
+}
 
 // Create the master grid (1-75)
 function initializeMasterGrid() {
@@ -221,6 +241,9 @@ function resetGame() {
     if (callBtn) {
         callBtn.textContent = 'Call';
     }
+    
+    // Restart auto-call
+    startAutoCall();
 }
 
 // Set up event listeners
