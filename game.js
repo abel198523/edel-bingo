@@ -5,14 +5,23 @@ const LANDING_SCREEN = 'landing-screen';
 const SELECTION_SCREEN = 'selection-screen';
 const GAME_SCREEN = 'game-screen';
 
+// Timer Constants
+const SELECTION_TIME = 45; // 45s Selection/Waiting time
+const GAME_SIMULATION_TIME = 30; // 30s Game simulation time (for current project phase)
+
 // Game state
 let masterNumbers = [];
 let calledNumbers = [];
 let playerCard = [];
 let markedCells = new Set();
 let autoCallInterval = null;
+let selectionTimerInterval = null;
+let gameTimerInterval = null;
+
 let currentStake = 10; // Default stake
 let selectedCardId = null;
+let isCardConfirmed = false; // Player has confirmed a card
+let hasPlayerCard = false; // Does the player have a card for the current game (Confirmed or not)
 
 // Initialize Telegram WebApp
 let tg = window.Telegram?.WebApp;
@@ -21,7 +30,7 @@ if (tg) {
 }
 
 // =========================================================================
-//                             SCREEN FLOW LOGIC
+//                             SCREEN FLOW LOGIC
 // =========================================================================
 
 // Function to switch between the three main screens
@@ -30,33 +39,34 @@ function switchScreen(targetId) {
     screens.forEach(id => {
         const screen = document.getElementById(id);
         if (screen) {
-            // Use 'flex' for the screen that needs to be visible
             screen.style.display = (id === targetId) ? 'flex' : 'none';
         }
     });
+    // Stop timers not relevant to the new screen
+    if (targetId !== SELECTION_SCREEN) clearInterval(selectionTimerInterval);
+    if (targetId !== GAME_SCREEN) stopAutoCall();
 }
 
 // 1. Landing Screen Handlers
 function handleStakeSelection(event) {
-    // Remove active class from all buttons
+    // ... (Stake selection logic - same as before) ...
     document.querySelectorAll('.stake-btn').forEach(btn => {
         btn.classList.remove('active-stake');
     });
 
-    // Add active class to the clicked button
     event.target.classList.add('active-stake');
-    
-    // Update the current stake value
     currentStake = parseInt(event.target.dataset.stake);
     
-    // Update the Play button text
     const playBtn = document.getElementById('start-selection-btn');
     playBtn.textContent = `▷ Play ${currentStake} ETB`;
 }
 
 function startSelectionPhase() {
-    // 1. Stop any potential auto-call interval if game was somehow running
+    // 1. Reset state
     stopAutoCall();
+    selectedCardId = null;
+    isCardConfirmed = false;
+    hasPlayerCard = false;
     
     // 2. Update Selection Header with current stake
     document.getElementById('current-stake').textContent = currentStake;
@@ -64,14 +74,24 @@ function startSelectionPhase() {
     // 3. Switch to Selection Screen
     switchScreen(SELECTION_SCREEN);
     
-    // 4. Initialize the card selection grid (10x10)
+    // 4. Initialize the card selection grid (resets card-select-cell state)
     initializeSelectionGrid();
+    
+    // 5. Start the 45-second timer
+    startSelectionTimer();
 }
 
 // 2. Selection Screen Handlers
 function initializeSelectionGrid() {
     const grid = document.getElementById('card-selection-grid');
-    if (!grid) return;
+    const confirmBtn = document.getElementById('confirm-card-btn');
+    const statusEl = document.getElementById('confirmation-status');
+
+    // Reset UI elements
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'ካርዱን አረጋግጥ';
+    statusEl.textContent = 'ካርድ ይምረጡና አረጋግጡ';
+    
     grid.innerHTML = '';
     
     // Create 100 cells for card selection (e.g., card IDs 1 to 100)
@@ -81,11 +101,12 @@ function initializeSelectionGrid() {
         cell.textContent = i;
         cell.dataset.cardId = i;
         
-        // Temporary: Randomly mark some as 'taken' for visual
+        // Temporary: Randomly mark some as 'taken' for visual (ensure selected card logic overrides this if confirmed)
         if (Math.random() < 0.2) {
              cell.classList.add('taken');
         } else {
-            cell.addEventListener('click', () => selectCard(cell));
+             // Use a function wrapper to ensure correct scope for the click listener
+             cell.addEventListener('click', function() { selectCard(cell); });
         }
         
         grid.appendChild(cell);
@@ -94,9 +115,11 @@ function initializeSelectionGrid() {
 
 function selectCard(cell) {
     const cardId = cell.dataset.cardId;
+    const confirmBtn = document.getElementById('confirm-card-btn');
+    const statusEl = document.getElementById('confirmation-status');
 
-    if (cell.classList.contains('taken')) {
-        return; // Cannot select taken card
+    if (cell.classList.contains('taken') || isCardConfirmed) {
+        return; // Cannot select taken card or if already confirmed
     }
     
     // Deselect previously selected card
@@ -109,37 +132,125 @@ function selectCard(cell) {
     cell.classList.add('selected');
     selectedCardId = cardId;
     
-    // For now, immediately start the game upon selection (Future: Add a "Confirm" button)
-    // We will simulate the start of the game after a slight delay for visual confirmation
-    setTimeout(() => {
-        startGame(cardId);
-    }, 500);
+    // Enable Confirm Button
+    confirmBtn.disabled = false;
+    statusEl.textContent = `Card ${cardId} ተመርጧል። ለማረጋገጥ ይጫኑ።`;
 }
+
+function handleCardConfirmation() {
+    if (!selectedCardId || isCardConfirmed) return;
+    
+    const confirmBtn = document.getElementById('confirm-card-btn');
+    const statusEl = document.getElementById('confirmation-status');
+    
+    isCardConfirmed = true;
+    hasPlayerCard = true; 
+    
+    // 1. UI Feedback: ቆጣሪው ከ confirmation ነጻ ሆኖ ይቀጥላል
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'ካርድዎ ተረጋግጧል።';
+    statusEl.textContent = `ካርድ ${selectedCardId} ተረጋግጧል። ጨዋታው እስኪጀመር ይጠብቁ።`;
+
+    // 2. Lock the grid (prevent further changes by removing listeners)
+    document.querySelectorAll('.card-select-cell').forEach(cell => {
+        // We need to use cloneNode to safely remove listeners without knowing the function reference
+        const newCell = cell.cloneNode(true);
+        cell.parentNode.replaceChild(newCell, cell);
+    });
+    // Re-select the confirmed cell (as cloneNode removes the selected class)
+    const confirmedCell = document.querySelector(`.card-select-cell[data-card-id="${selectedCardId}"]`);
+    if(confirmedCell) confirmedCell.classList.add('selected');
+}
+
+// === TIMER LOGIC: 45s Timer (Independent of Confirmation) ===
+function startSelectionTimer() {
+    let timeLeft = SELECTION_TIME;
+    const timeDisplay = document.getElementById('time-left');
+
+    if (selectionTimerInterval) clearInterval(selectionTimerInterval);
+    
+    timeDisplay.textContent = `${timeLeft}s`;
+
+    selectionTimerInterval = setInterval(() => {
+        timeLeft--;
+        timeDisplay.textContent = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+            clearInterval(selectionTimerInterval);
+            timeDisplay.textContent = 'GO!';
+            
+            // Time is up, start the game regardless of confirmation status
+            startGame(selectedCardId); 
+        }
+    }, 1000);
+}
+
 
 // 3. Game Start
 function startGame(cardId) {
-    console.log(`Starting game with Stake: ${currentStake} and Card ID: ${cardId}`);
+    // If a card was selected but not confirmed, or nothing selected, it's Watch Only
+    if (!isCardConfirmed || !cardId) {
+        hasPlayerCard = false; 
+        console.log("Starting game without a card (Watch Only Mode)");
+    } else {
+        hasPlayerCard = true; 
+        console.log(`Starting game with Stake: ${currentStake} and Card ID: ${cardId}`);
+    }
     
     // 1. Switch to Game Screen
     switchScreen(GAME_SCREEN);
     
     // 2. Initialize Game Assets
-    // We use the existing functions, now ensuring they run AFTER selection
     initializeMasterGrid();
-    // Note: For now, generatePlayerCard still creates a random card, ignoring the passed cardId.
-    // In a final multiplayer game, generatePlayerCard would use the server-determined card based on cardId.
-    generatePlayerCard(); 
+    generatePlayerCard(cardId); // Handles Watch Only visibility based on hasPlayerCard
     
-    // 3. Start the game flow
-    startAutoCall();
+    // 3. Start the game flow and the simulation timer (30s)
+    startAutoCall(); 
+    startGameSimulationTimer();
 }
 
+// === NEW: Game Simulation Timer (30s) ===
+function startGameSimulationTimer() {
+    let timeLeft = GAME_SIMULATION_TIME;
+    
+    if (gameTimerInterval) clearInterval(gameTimerInterval);
+    
+    gameTimerInterval = setInterval(() => {
+        timeLeft--;
+        console.log(`Game Simulation Time Left: ${timeLeft}s`);
+
+        if (timeLeft <= 0) {
+            clearInterval(gameTimerInterval);
+            gameTimerInterval = null;
+
+            // 1. Announce End
+            stopAutoCall();
+            document.getElementById('current-call').textContent = 'WINNER!';
+            
+            // 2. Wait 3 seconds, then go back to selection
+            setTimeout(() => {
+                endGame();
+            }, 3000);
+        }
+    }, 1000);
+}
+
+// === NEW: End Game Function ===
+function endGame() {
+    // Stop all timers
+    stopAutoCall();
+    if (gameTimerInterval) clearInterval(gameTimerInterval);
+    if (selectionTimerInterval) clearInterval(selectionTimerInterval);
+
+    // Go back to selection screen to start the next round
+    startSelectionPhase();
+}
 
 // =========================================================================
-//                             ORIGINAL BINGO LOGIC
+//                             ORIGINAL BINGO LOGIC
 // =========================================================================
 
-// Auto-call system - calls a number every 3 seconds
+// Auto-call system (calls a number every 3 seconds)
 function startAutoCall() {
     if (autoCallInterval) {
         clearInterval(autoCallInterval);
@@ -160,15 +271,14 @@ function stopAutoCall() {
     }
 }
 
-// Create the master grid (1-75) - arranged by BINGO columns
+// Create the master grid (1-75)
 function initializeMasterGrid() {
+    // ... (Master Grid generation logic - same as before) ...
     const masterGrid = document.getElementById('master-grid');
     masterGrid.innerHTML = '';
     masterNumbers = [];
     calledNumbers = []; // Reset called numbers
     
-    // B: 1-15, I: 16-30, N: 31-45, G: 46-60, O: 61-75
-    // Grid is 5 columns x 15 rows, fill by row but with BINGO order
     for (let row = 0; row < 15; row++) {
         for (let col = 0; col < 5; col++) {
             const number = (col * 15) + row + 1;
@@ -180,19 +290,29 @@ function initializeMasterGrid() {
             masterNumbers.push(number);
         }
     }
-    // Reset call button and history when grid is initialized
     document.getElementById('current-call').textContent = 'Call';
     updateCallHistory();
 }
 
-// Generate a random bingo card (5x5 with free space in center)
-function generatePlayerCard(cardId = null) { // cardId is currently ignored
+// Generate a random bingo card (5x5 with free space in center) or show Watch Only
+function generatePlayerCard(cardId = null) {
     const playerCardEl = document.getElementById('player-bingo-card');
+    const watchPlacard = document.getElementById('watch-only-placard');
+    
+    if (!hasPlayerCard) {
+        // Watch Only Mode
+        playerCardEl.innerHTML = '';
+        watchPlacard.style.display = 'flex';
+        return;
+    }
+
+    // Normal game mode
+    watchPlacard.style.display = 'none';
     playerCardEl.innerHTML = '';
     playerCard = [];
     markedCells.clear();
     
-    // Create headers (B-I-N-G-O) - (6 rows total in CSS grid)
+    // ... (Card generation logic - same as before) ...
     const headers = ['B', 'I', 'N', 'G', 'O'];
     headers.forEach(letter => {
         const header = document.createElement('div');
@@ -201,22 +321,16 @@ function generatePlayerCard(cardId = null) { // cardId is currently ignored
         playerCardEl.appendChild(header);
     });
     
-    // Generate numbers for each column
     const columns = [
-        generateColumn(1, 15),   // B: 1-15
-        generateColumn(16, 30),  // I: 16-30
-        generateColumn(31, 45),  // N: 31-45
-        generateColumn(46, 60),  // G: 46-60
-        generateColumn(61, 75)   // O: 61-75
+        generateColumn(1, 15), generateColumn(16, 30), generateColumn(31, 45),
+        generateColumn(46, 60), generateColumn(61, 75)
     ];
     
-    // Create 5x5 grid (rows 2-6 in CSS grid)
     for (let row = 0; row < 5; row++) {
         for (let col = 0; col < 5; col++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
             
-            // Center cell is FREE space
             if (row === 2 && col === 2) {
                 cell.textContent = 'FREE';
                 cell.classList.add('free-space', 'marked');
@@ -228,7 +342,6 @@ function generatePlayerCard(cardId = null) { // cardId is currently ignored
                 cell.dataset.number = number;
                 playerCard.push(number);
                 
-                // Add click event to mark/unmark
                 cell.addEventListener('click', function() {
                     toggleCell(cell);
                 });
@@ -237,19 +350,11 @@ function generatePlayerCard(cardId = null) { // cardId is currently ignored
             playerCardEl.appendChild(cell);
         }
     }
-    
-    // Re-mark any cells that were already called (if the game is in progress)
-    playerCardEl.querySelectorAll('.cell').forEach(cell => {
-        const number = parseInt(cell.dataset.number);
-        if (calledNumbers.includes(number)) {
-            cell.classList.add('marked');
-            markedCells.add(number);
-        }
-    });
 }
 
 // Generate random numbers for a column
 function generateColumn(min, max) {
+    // ... (Column generation logic - same as before) ...
     const numbers = [];
     const available = [];
     
@@ -257,7 +362,6 @@ function generateColumn(min, max) {
         available.push(i);
     }
     
-    // Pick 5 random numbers
     for (let i = 0; i < 5; i++) {
         const randomIndex = Math.floor(Math.random() * available.length);
         numbers.push(available[randomIndex]);
@@ -271,12 +375,11 @@ function generateColumn(min, max) {
 function toggleCell(cell) {
     const number = cell.dataset.number;
     
-    if (number === 'free') return; // Can't toggle free space
+    if (number === 'free') return;
     
     // Only allow marking if the number has been officially called
     if (!calledNumbers.includes(parseInt(number))) {
         console.log(`Number ${number} has not been called yet!`);
-        // We could add a visual feedback here instead of just logging
         return; 
     }
     
@@ -286,7 +389,7 @@ function toggleCell(cell) {
     } else {
         cell.classList.add('marked');
         markedCells.add(number);
-        checkForBingo();
+        checkForBingo(); // Check for Bingo immediately after marking
     }
 }
 
@@ -306,39 +409,26 @@ function callNumber() {
     calledNumbers.push(calledNumber);
     
     // Update the Call button to show the latest number
-    const callBtn = document.getElementById('current-call');
-    if (callBtn) {
-        callBtn.textContent = calledNumber;
-    }
+    document.getElementById('current-call').textContent = calledNumber;
     
     // Update call history (show last 3 calls)
     updateCallHistory();
     
     // Mark the number in the master grid
-    const masterCells = document.querySelectorAll('.master-cell');
-    masterCells.forEach(cell => {
+    document.querySelectorAll('.master-cell').forEach(cell => {
         if (parseInt(cell.dataset.number) === calledNumber) {
             cell.classList.add('called');
         }
     });
-    
-    // Auto-mark the player's card (optional, but good for UX)
-    // We already added a check in toggleCell, but we can visually mark it here too
-    const playerCells = document.querySelectorAll('#player-bingo-card .cell');
-    playerCells.forEach(cell => {
-        if (parseInt(cell.dataset.number) === calledNumber) {
-            cell.classList.add('marked');
-            markedCells.add(cell.dataset.number);
-            checkForBingo();
-        }
-    });
+
+    // NOTE: We do NOT auto-mark the player card here. Player must click (toggleCell) to mark.
 }
 
 // Update call history display
 function updateCallHistory() {
+    // ... (Update call history logic - same as before) ...
     const historyItems = document.querySelectorAll('.history-item');
-    // Get the last three called numbers, excluding the latest one displayed in the circle
-    const lastThree = calledNumbers.slice(-4, -1).reverse(); 
+    const lastThree = calledNumbers.slice(-3).reverse(); 
     
     historyItems.forEach((item, index) => {
         if (lastThree[index]) {
@@ -349,49 +439,26 @@ function updateCallHistory() {
     });
 }
 
-// Check if player has bingo
+// Check if player has bingo (Simplified and corrected for 5x5 cell structure)
 function checkForBingo() {
-    // This check is the core game logic and remains the same
     const grid = Array(5).fill().map(() => Array(5).fill(false));
     
+    // Select only the 25 cell elements (skipping the 5 header elements)
     const playerCells = document.querySelectorAll('#player-bingo-card .cell');
     
-    // Map marked cells onto a 5x5 grid representation
-    let cellIndex = 0;
-    for (let row = 0; row < 5; row++) {
-        for (let col = 0; col < 5; col++) {
-            // Adjust cellIndex based on the 6x5 display grid (skips the header row)
-            const displayIndex = (row + 1) * 5 + col; 
-            const cell = playerCells[displayIndex];
-
-            // NOTE: The cell traversal logic here needs to align with the HTML structure which includes headers
-            // A simpler way: just iterate over the cells that are NOT headers
-            
-            const realIndex = row * 5 + col;
-            const targetCell = document.getElementById('player-bingo-card').children[realIndex + 5]; // +5 to skip headers
-            
-            if (targetCell && targetCell.classList.contains('marked')) {
-                grid[row][col] = true;
-            }
-        }
-    }
-    
-    // Fill the grid with marked status (Simplified for 5x5 content area only)
-    let cellCounter = 0;
-    document.querySelectorAll('#player-bingo-card .cell').forEach(cell => {
-        const row = Math.floor(cellCounter / 5);
-        const col = cellCounter % 5;
-        if (row < 5 && col < 5) { // Ensure we only check the 5x5 card area (after headers)
-            if (cell.classList.contains('marked')) {
-                grid[row][col] = true;
-            }
-            cellCounter++;
+    playerCells.forEach((cell, index) => {
+        const row = Math.floor(index / 5);
+        const col = index % 5;
+        
+        if (cell.classList.contains('marked')) {
+            grid[row][col] = true;
         }
     });
 
     // Check rows
     for (let row = 0; row < 5; row++) {
         if (grid[row].every(cell => cell)) {
+            console.log('BINGO! Row Win!');
             return true;
         }
     }
@@ -399,29 +466,24 @@ function checkForBingo() {
     // Check columns
     for (let col = 0; col < 5; col++) {
         if (grid.every(row => row[col])) {
+            console.log('BINGO! Column Win!');
             return true;
         }
     }
     
     // Check diagonals
     if (grid[0][0] && grid[1][1] && grid[2][2] && grid[3][3] && grid[4][4]) {
+        console.log('BINGO! Diagonal Win (Left-Top)!');
         return true;
     }
     if (grid[0][4] && grid[1][3] && grid[2][2] && grid[3][1] && grid[4][0]) {
+        console.log('BINGO! Diagonal Win (Right-Top)!');
         return true;
     }
     
     return false;
 }
 
-// Reset the game (resets only the game screen components)
-function resetGame() {
-    stopAutoCall();
-    calledNumbers = [];
-    initializeMasterGrid();
-    generatePlayerCard();
-    startAutoCall();
-}
 
 // Set up event listeners for all screens
 function setupEventListeners() {
@@ -433,43 +495,27 @@ function setupEventListeners() {
 
     document.getElementById('start-selection-btn')?.addEventListener('click', startSelectionPhase);
 
+    // SELECTION SCREEN LISTENERS
+    document.getElementById('confirm-card-btn')?.addEventListener('click', handleCardConfirmation);
 
     // GAME SCREEN LISTENERS
-    // "አዲስ ካርድ" button - Generate new card (and restart game flow)
-    const newCardBtn = document.querySelector('.top-round-btn');
-    if (newCardBtn) {
-        newCardBtn.addEventListener('click', resetGame); 
-    }
-    
-    // "Call" button (for manual call testing)
-    const callBtn = document.getElementById('current-call');
-    if (callBtn) {
-        // Temporarily commented out to rely solely on auto-call for game flow
-        // callBtn.addEventListener('click', callNumber);
-    }
-    
-    // "Refresh" button - Reset the game
-    const refreshBtn = document.getElementById('refresh-btn');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', resetGame);
-    }
+    // "አዲስ ካርድ" button & "Refresh" button -> Ends the current game and goes back to selection
+    document.querySelector('.top-round-btn')?.addEventListener('click', endGame);
+    document.getElementById('refresh-btn')?.addEventListener('click', endGame);
     
     // "BINGO" button - Check for bingo
-    const bingoBtn = document.getElementById('bingo-btn');
-    if (bingoBtn) {
-        bingoBtn.addEventListener('click', function() {
-            if (checkForBingo()) {
-                // IMPORTANT: Since you cannot use alert(), this needs a custom UI element in HTML/CSS
-                console.log('BINGO! Congratulations! (Use a custom modal instead of alert)');
-                // For demonstration:
-                bingoBtn.textContent = '🎉 BINGO! 🎉';
-            } else {
-                console.log('Not yet! Keep playing! (Use a custom modal instead of alert)');
-                bingoBtn.textContent = 'Not Yet...';
-                setTimeout(() => bingoBtn.textContent = 'BINGO', 1000);
-            }
-        });
-    }
+    document.getElementById('bingo-btn')?.addEventListener('click', function() {
+        if (checkForBingo()) {
+            console.log('BINGO! Congratulations! (Implement custom modal)');
+            document.getElementById('bingo-btn').textContent = '🎉 BINGO! 🎉';
+            stopAutoCall();
+        } else {
+            console.log('Not yet! Keep playing!');
+            const bingoBtn = document.getElementById('bingo-btn');
+            bingoBtn.textContent = 'Not Yet...';
+            setTimeout(() => bingoBtn.textContent = 'BINGO', 1000);
+        }
+    });
 }
 
 // Initialize the screen flow when the page loads
