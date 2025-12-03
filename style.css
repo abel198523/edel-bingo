@@ -1,10 +1,14 @@
-/* style.css (የተስተካከለ: Exit እና Refresh ተወግደዋል፣ Layout ተስተካክሏል) */
+/* style.css (የተዋሃደ: Landing, Selection, እና Game Layouts) */
 
 :root {
     --color-bg-dark: #12121e;
     --color-block-dark: #2c293d;
     --color-accent: #ffc107;
     --color-text-light: #f4f4f9;
+    /* አዲስ ቀለሞች ለ Selection/Landing screens */
+    --color-red-mark: #d9534f; /* ለሌሎች ተጫዋቾች ምርጫ/ጊዜ ቆጣሪ */
+    --color-blue-dark: #5c596e; /* ለ header/footer ዳራ */
+    --color-play-btn: #28a745; /* አረንጓዴ */
 }
 
 body {
@@ -22,7 +26,7 @@ body {
 
 .main-wrapper {
     width: 100%;
-    padding: 5px; 
+    /* padding: 5px; - በስክሪኖች ውስጥ ይደረጋል */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -30,7 +34,209 @@ body {
     height: 100dvh;
 }
 
-/* ===== ዋናው የጨዋታ አካል (2 Column Layout) ===== */
+/* ================================================== */
+/* ===== 0. የመግቢያ ስክሪን (Landing Screen CSS) ===== */
+/* ================================================== */
+
+#landing-screen {
+    display: flex; /* መጀመሪያ ይታያል */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    padding: 20px;
+    height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
+    background-color: #1a1a2e; 
+    text-align: center;
+}
+
+.welcome-box {
+    background-color: var(--color-block-dark);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    width: 90%;
+    max-width: 400px;
+}
+
+.welcome-box h1 {
+    color: var(--color-accent);
+    margin-bottom: 5px;
+}
+.welcome-box h2 {
+    font-size: 1.2em;
+    color: #ccc;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+.stake-selection {
+    margin-bottom: 25px;
+}
+
+.stake-selection p {
+    font-size: 0.9em;
+    color: var(--color-accent);
+    margin-bottom: 10px;
+}
+
+.stake-btn {
+    background-color: #444;
+    color: var(--color-text-light);
+    border: 2px solid #666;
+    padding: 8px 15px;
+    margin: 0 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.stake-btn.active-stake {
+    background-color: var(--color-accent);
+    color: var(--color-block-dark);
+}
+
+.play-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--color-text-light);
+    background-color: var(--color-play-btn);
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* ================================================== */
+/* ===== 1. የካርድ መምረጫ ስክሪን (Selection Screen CSS) ===== */
+/* ================================================== */
+
+#selection-screen {
+    display: none; /* መጀመሪያ ይደበቃል */
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 5px;
+    height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
+    background-color: #1a1a2e; 
+}
+
+/* ራስጌ (Wallet, Stake, Time) */
+.selection-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: var(--color-blue-dark);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.header-info {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.header-info .label {
+    font-size: 0.7em;
+    color: #ccc;
+}
+
+.header-info .value {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--color-accent);
+}
+
+.time-counter .time-value {
+    background-color: var(--color-red-mark);
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.1em;
+}
+
+/* 10x10 የካርድ መምረጫ ግሪድ */
+.card-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr); 
+    grid-template-rows: repeat(10, 1fr);
+    gap: 8px;
+    flex-grow: 1;
+    padding: 5px;
+    background-color: var(--color-block-dark);
+    border-radius: 8px;
+    overflow-y: auto; 
+}
+
+.card-select-cell {
+    background-color: #3e3e3e;
+    color: var(--color-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    aspect-ratio: 1 / 1; 
+}
+
+/* ለሌሎች ተጫዋቾች የተያዙ ካርዶች */
+.card-select-cell.taken {
+    background-color: var(--color-red-mark); 
+    color: white;
+}
+
+/* ተጫዋቹ የመረጠው ካርድ */
+.card-select-cell.selected {
+    background-color: var(--color-accent); 
+    color: var(--color-bg-dark);
+}
+
+/* ታችኛው አዝራሮች (Footer Navigation) */
+.selection-footer {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    margin-top: 10px;
+    background-color: var(--color-blue-dark);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.footer-btn {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.footer-btn.active {
+    color: var(--color-accent);
+    font-weight: bold;
+}
+
+/* ================================================== */
+/* ===== 2. ዋናው የጨዋታ ስክሪን (Game Screen CSS) ===== */
+/* ================================================== */
+
+#game-screen {
+    display: none; /* መጀመሪያ ይደበቃል */
+    padding: 5px; /* ከዋናው main-wrapper padding ተወስዷል */
+    box-sizing: border-box;
+    flex-grow: 1; 
+    height: 100%;
+}
+
+
+/* ===== ዋናው የጨዋታ አካል (2 Column Layout) - ኦሪጅናል ኮድዎ ===== */
 .game-area-grid {
     display: flex;
     flex-direction: row; 
@@ -109,8 +315,6 @@ body {
     justify-content: center;
 }
 
-/* 4. የታችኛው አዝራር (Exit) ወጥቷል */
-
 
 /* ===== የቀኝ አካል ንጥረ ነገሮች ===== */
 
@@ -183,7 +387,6 @@ body {
     background-color: var(--color-accent); 
     color: var(--color-bg-dark);
 }
-/* Refresh አዝራር ወጥቷል */
 
 /* ===== የ Master Grid (1-75) ቅንብሮች ===== */
 
