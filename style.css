@@ -217,7 +217,7 @@ body {
 }
 
 /* ================================================== */
-/* ===== 2. ዋናው የጨዋታ ስክሪን (Game Screen CSS) - እንደ ዲዛይኑ የተስተካከለ ===== */
+/* ===== 2. ዋናው የጨዋታ ስክሪን (Game Screen CSS) - ዲዛይኑን በትክክል የሚያንፀባርቅ ===== */
 /* ================================================== */
 
 #game-screen {
@@ -261,7 +261,9 @@ body {
 
 /* ===== የግራ አካል ንጥረ ነገሮች (Master Grid) ===== */
 
+/* አዲስ ካርድ (Header) */
 .top-round-btn {
+    /* "አዲስ ካርድ" የራስጌ ስታይል */
     padding: 8px 10px;
     background-color: var(--color-block-dark);
     border: 3px solid var(--color-red-mark); 
@@ -279,16 +281,17 @@ body {
     background-color: var(--color-block-dark);
     border: 3px solid var(--color-red-mark);
     border-radius: 20px;
-    flex: 1 1 0; /* ቁመቱን ይይዛል */
+    flex: 1 1 0; 
     min-height: 0; 
     padding: 8px; 
     display: flex;
 }
 
+/* Master Grid 5x15 Structure */
 .master-grid {
     display: grid; 
-    grid-template-columns: repeat(5, 1fr); 
-    grid-template-rows: repeat(15, 1fr); 
+    grid-template-columns: repeat(5, 1fr); /* 5 ዓምዶች */
+    grid-template-rows: repeat(15, 1fr); /* 15 ረድፎች */
     gap: 4px; 
     flex-grow: 1; 
     overflow: hidden; 
@@ -306,8 +309,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    aspect-ratio: 1 / 1; 
 }
+/* ቁመቱ በgrid-template-rows ስለሚወሰን aspect-ratio አያስፈልግም, ነገር ግን የ Master Grid ሴሎች ትክክለኛውን ቦታ እንዲይዙ ያረጋግጡ */
 .master-cell.called {
     background-color: var(--color-accent);
     color: var(--color-bg-dark);
@@ -315,6 +318,7 @@ body {
 }
 
 .mid-round-btn {
+    /* Refresh Button */
     padding: 8px;
     background-color: var(--color-block-dark);
     border: 3px solid var(--color-red-mark);
@@ -382,7 +386,7 @@ body {
     background-color: var(--color-block-dark);
     border: 3px solid var(--color-red-mark);
     border-radius: 20px;
-    flex: 1 1 0; 
+    flex: 1 1 0; /* የቀረውን ቁመት ይወስዳል */
     min-height: 0;
     padding: 8px; 
     position: relative; 
@@ -411,7 +415,7 @@ body {
 .bingo-card-player {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(6, 1fr); 
+    grid-template-rows: repeat(6, 1fr); /* 1 ለራስጌ + 5 ለካርድ */
     gap: 3px; 
     background-color: #12121e;
     border-radius: 5px;
@@ -453,6 +457,7 @@ body {
 }
 
 .bottom-btn {
+    /* BINGO Button */
     padding: 12px 8px;
     font-size: 1.2em;
     font-weight: bold;
